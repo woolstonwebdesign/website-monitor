@@ -24,9 +24,7 @@ if ( count($links) > 0 ) {
    //print_r(json_encode($links, JSON_PRETTY_PRINT));
 }
 
-foreach($curl_code as urlExists("https://www.woolston.com.au")) {
-    print_r($curl_code);
-}
+var_dump(urlExists("https://www.woolston.com.au"));
 
 function urlExists($url=NULL)  
 {  
