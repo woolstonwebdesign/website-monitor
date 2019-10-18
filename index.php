@@ -25,7 +25,7 @@ if ( count($links) > 0 ) {
 }
 
 foreach($curl_code as urlExists("https://www.woolston.com.au")) {
-    var_dump($curl_code);
+    print_r($curl_code);
 }
 
 function urlExists($url=NULL)  
