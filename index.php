@@ -13,18 +13,29 @@ curl_setopt_array($curl, array(
     ),
 ));
 
-// $response = curl_exec($curl);
-// $err = curl_error($curl);
-// curl_close($curl);
+$response = curl_exec($curl);
+$data = json_decode($response, true);
+$err = curl_error($curl);
+curl_close($curl);
 
-$data  = crawler::http_request('https://www.woolston.com.au');
-$links = crawler::extract_elements('a', $data);
-if ( count($links) > 0 ) {
-   //file_put_contents('links.json', json_encode($links, JSON_PRETTY_PRINT));
-   //print_r(json_encode($links, JSON_PRETTY_PRINT));
+foreach($data['data'] as $website) {
+    $url = $website['URL'];
+    if ($url) {
+        $site_data  = crawler::http_request($url);
+        // $links = crawler::extract_elements('a', $site_data);
+        // if ( count($links) > 0 ) {
+        //file_put_contents('links.json', json_encode($links, JSON_PRETTY_PRINT));
+        //print_r(json_encode($links, JSON_PRETTY_PRINT));
+        // }
+        echo "<h1>" .$url. "</h1>";
+        // echo "<ul>";
+        // echo "<li>" .json_encode($site_data, JSON_PRETTY_PRINT). "</li>";
+        // echo "<li>" .json_encode($links, JSON_PRETTY_PRINT). "</li>";
+        //echo "<li>" .json_encode(urlExists($url), true). "</li>";
+        // echo "</ul>";
+        echo "<hr />";
+    }
 }
-
-var_dump(urlExists("https://www.woolston.com.au"));
 
 function urlExists($url=NULL)  
 {  
