@@ -18,8 +18,9 @@ include 'crawler.php';
 // curl_close($curl);
 $response = crawler::http_request("https://api.woolston.com.au/crm/v1/customers");
 $data = json_decode($response, true);
+$websites = $data["data"];
 
-foreach($data['data'] as $website) {
+foreach($websites as $website) {
     $url = $website['URL'];
     if ($url) {
         // $site_data  = crawler::http_request($url);
@@ -32,7 +33,7 @@ foreach($data['data'] as $website) {
         $startTime = new DateTime();
         $headers = get_headers($url, 1);
         $endTime = new DateTime();
-        echo "<h1>" .$url. "</h1>";
+        echo "<h1>" .$url. "<span style='font-size: 0.8em'>" .$headers[0]. "</span></h1>";
         // echo "<ul>";
         echo "<li>Time taken: " .(($endTime->getTimestamp() - $startTime->getTimestamp())*1000). " millisecs</li>";
         echo "<li>" .json_encode($headers). "</li>";
