@@ -1,9 +1,9 @@
 <?php
 namespace v1\objects;
-include_once 'api/autoload.php';
-
 use \config\Helpers;
 use \config\Response;
+
+include_once 'api/autoload.php';
 
 class Website {
  
@@ -14,6 +14,7 @@ class Website {
 	public $SiteUrl;
 	public $MonitorResponseBody;
 	public $MonitorHttpCode;
+	public $DateCreated;
  
     public function __construct($db){
 		$this->conn = $db;
@@ -27,21 +28,26 @@ class Website {
 	}
 
 	function create() {
+		date_default_timezone_set('Australia/Melbourne');
+		$dateCreated = new \DateTime();
+		$dateCreated = $dateCreated->format("Y-m-d H:i:s");
 		$query = "INSERT INTO sitemonitor
 				SET
 					SiteUrl = :SiteUrl, 
 					MonitorResponseBody = :MonitorResponseBody,
-					MonitorHttpCode = :MonitorHttpCode";
+					MonitorHttpCode = :MonitorHttpCode,
+					DateCreated = :DateCreated";
 	
 		$stmt = $this->conn->prepare($query);
 		$stmt->bindParam(":SiteUrl", $this->SiteUrl);
 		$stmt->bindParam(":MonitorResponseBody", $this->MonitorResponseBody);
 		$stmt->bindParam(":MonitorHttpCode", $this->MonitorHttpCode);
-	
+		$stmt->bindParam(":DateCreated", $dateCreated);
+		
 		try {
 			if ($stmt->execute()) {
 				$this->Id=$this->conn->lastInsertId();
-				return new Response(true, "Created successfully". $userId, $this);
+				return new Response(true, "Created successfully", $this);
 				die();
 			}
 		} catch (\PDOException $e) {
