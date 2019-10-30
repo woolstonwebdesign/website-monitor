@@ -1,9 +1,9 @@
 <?php
 namespace v1\objects;
+include_once 'api/autoload.php';
+
 use \config\Helpers;
 use \config\Response;
-
-include_once '../autoload.php';
 
 class Website {
  
@@ -11,117 +11,43 @@ class Website {
 	private $helpers;
 
     public $Id;
-	public $Url;
-	public $Headers;
+	public $SiteUrl;
+	public $MonitorResponseBody;
+	public $MonitorHttpCode;
  
     public function __construct($db){
 		$this->conn = $db;
 		$this->helpers = new Helpers();
 	}
 
-	function getByUserName($userName) {
-		$query = "SELECT 
-				u.Id, u.UserName, u.FirstName, u.Surname, u.EmailAddress, u.IsActive, u.DateCreated
-			FROM user u
-			WHERE u.UserName = '" . $userName . "'
-			AND u.IsActive = 1";
-
+	function getAll($userName) {
+		$query = "SELECT * FROM sitemonitor";
 		$stmt = $this->conn->query($query)->fetchAll(\PDO::FETCH_ASSOC);
-		return $stmt;
+		return new Response(true, "Read all successful.", $stmt->fetchAll(PDO::FETCH_ASSOC));
 	}
 
 	function create() {
-
-		$query = "INSERT INTO user
+		$query = "INSERT INTO sitemonitor
 				SET
-					UserName = :UserName, 
-					FirstName = :FirstName,
-					Surname = :Surname,
-					EmailAddress = :EmailAddress,
-					IsActive = :IsActive";
+					SiteUrl = :SiteUrl, 
+					MonitorResponseBody = :MonitorResponseBody,
+					MonitorHttpCode = :MonitorHttpCode";
 	
 		$stmt = $this->conn->prepare($query);
-
-		$this->UserName=htmlspecialchars(strip_tags($this->EmailAddress));
-		$this->FirstName=htmlspecialchars(strip_tags($this->FirstName));
-		$this->Surname=htmlspecialchars(strip_tags($this->Surname));
-		$this->EmailAddress=htmlspecialchars(strip_tags($this->EmailAddress));
+		$stmt->bindParam(":SiteUrl", $this->SiteUrl);
+		$stmt->bindParam(":MonitorResponseBody", $this->MonitorResponseBody);
+		$stmt->bindParam(":MonitorHttpCode", $this->MonitorHttpCode);
 	
-		$stmt->bindParam(":UserName", $this->UserName);
-		$stmt->bindParam(":FirstName", $this->FirstName);
-		$stmt->bindParam(":Surname", $this->Surname);
-		$stmt->bindParam(":EmailAddress", $this->EmailAddress);
-		$stmt->bindParam(":IsActive", $this->IsActive);
-	
-		if ($stmt->execute()) {
-			$this->Id=$this->conn->lastInsertId();
-			return true;
-			die();
-		}
-
-		return false;
-
-	}
-
-	function update() {
-
-		if ($this->Id == null) {
-			return false;
-			die();
-		}
-
 		try {
-
-			$query = "UPDATE user
-					SET
-						UserName = :UserName, 
-						FirstName = :FirstName,
-						Surname = :Surname,
-						EmailAddress = :EmailAddress,
-						IsActive = :IsActive
-					WHERE Id = :Id";
-		
-			$stmt = $this->conn->prepare($query);
-			
-			$this->UserName=htmlspecialchars(strip_tags($this->UserName));
-			$this->FirstName=htmlspecialchars(strip_tags($this->FirstName));
-			$this->Surname=htmlspecialchars(strip_tags($this->Surname));
-			$this->EmailAddress=htmlspecialchars(strip_tags($this->EmailAddress));
-		
-			$stmt->bindParam(":Id", $this->Id);
-			$stmt->bindParam(":UserName", $this->UserName);
-			$stmt->bindParam(":FirstName", $this->FirstName);
-			$stmt->bindParam(":Surname", $this->Surname);
-			$stmt->bindParam(":EmailAddress", $this->EmailAddress);
-			$stmt->bindParam(":IsActive", $this->IsActive);
-		
 			if ($stmt->execute()) {
-				return $this;
+				$this->Id=$this->conn->lastInsertId();
+				return new Response(true, "Created successfully". $userId, $this);
 				die();
 			}
-
-			return false;
-			die();
-
-		} catch (\Exception $e) {
-			return $e->getMessage();
+		} catch (\PDOException $e) {
+			return new Response(false, "Create failed. " .$e->Message(), null);
 		}
 
+		return new Response(false, "Create failed.", null);
 	}
-
-	function delete($userName) {
-	
-		$this->UserName = $userName;
-        
-		$query = "DELETE FROM " . $this->table_name . " WHERE UserName = :UserName";
-		$stmt = $this->conn->prepare($query);
-		$stmt->bindParam(":UserName", $this->UserName);
- 		
-		if ($stmt->execute()) {
-			return true;
-		}
-	
-		return false;
-	}	
-
 }

@@ -1,45 +1,51 @@
 <?php
-include 'crawler.php';
+//include 'crawler.php';
+include_once 'api/autoload.php';
+use \config\Database;
+use \v1\objects\Website;
 
-// $curl = curl_init();
-// curl_setopt_array($curl, array(
-//     CURLOPT_URL => ,
-//     CURLOPT_RETURNTRANSFER => true,
-//     CURLOPT_TIMEOUT => 30,
-//     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-//     CURLOPT_CUSTOMREQUEST => "GET",
-//     CURLOPT_HTTPHEADER => array(
-//         "cache-control: no-cache"
-//     ),
-// ));
+$database = new Database();
+$db = $database->getConnection();
+$website = new Website($db);
 
-// $response = curl_exec($curl);
-// $err = curl_error($curl);
-// curl_close($curl);
-$response = crawler::http_request("https://api.woolston.com.au/crm/v1/customers");
+$curl = curl_init();
+curl_setopt_array($curl, array(
+    CURLOPT_URL => "https://api.woolston.com.au/crm/v1/customers",
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_TIMEOUT => 30,
+    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+    CURLOPT_CUSTOMREQUEST => "GET",
+    // CURLOPT_HTTPHEADER => array(
+    //     "cache-control: no-cache"
+    // ),
+));
+
+$response = curl_exec($curl);
+$httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);  
+$err = curl_error($curl);
+curl_close($curl);
+//$response = crawler::http_request("https://api.woolston.com.au/crm/v1/customers");
 $data = json_decode($response, true);
 $websites = $data["data"];
 
 foreach($websites as $website) {
     $url = $website['URL'];
     if ($url) {
-        // $site_data  = crawler::http_request($url);
-        // $links = crawler::extract_elements('a', $site_data);
-        // if ( count($links) > 0 ) {
-        //file_put_contents('links.json', json_encode($links, JSON_PRETTY_PRINT));
-        //print_r(json_encode($links, JSON_PRETTY_PRINT));
-        // }
         date_default_timezone_set('Australia/Melbourne');
-        $startTime = new DateTime();
+        $startTime = new \DateTime();
         $headers = get_headers($url, 1);
-        $endTime = new DateTime();
+        $endTime = new \DateTime();
+
+        $website->SiteUrl = $url;
+        $website->MonitorHttpCode = $httpcode;
+        $website->MonitorResponseBody = $headers;
+        $response = $website->create();
         echo "<h1>" .$url. "<span style='font-size: 0.8em'>" .$headers[0]. "</span></h1>";
-        // echo "<ul>";
+        echo "<ul>";
         echo "<li>Time taken: " .(($endTime->getTimestamp() - $startTime->getTimestamp())*1000). " millisecs</li>";
         echo "<li>" .json_encode($headers). "</li>";
-        // echo "<li>" .json_encode($links, JSON_PRETTY_PRINT). "</li>";
-        //echo "<li>" .json_encode(urlExists($url), true). "</li>";
-        // echo "</ul>";
+        echo "<li>" .$response. "</li>";
+        echo "</ul>";
         echo "<hr />";
     }
 }

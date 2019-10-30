@@ -9,12 +9,11 @@ class Database {
     // private $username = "root";
     // private $password = "root";
 
-    private $host = "mysql5021.site4now.net";
-    private $db_name = "db_9c4ddd_auth";
-    private $username = "9c4ddd_auth";
+    private $host = "mysql5022.site4now.net";
+    private $db_name = "db_9c4ddd_admin";
+    private $username = "9c4ddd_admin";
     private $password = "H@nnahN0ah";
 
-    public $password_salt = "woolston";
     public $conn;
  
     // get the database connection
