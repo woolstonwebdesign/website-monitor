@@ -1,5 +1,5 @@
 <?php
-namespace config;
+include_once 'class.phpmailer.php';
 
 class Mailer {
  
@@ -18,7 +18,7 @@ class Mailer {
  
     public function send_email() {
 
-        $mail = new PHPMailer();
+        $mail = new config\PHPMailer();
  
         $mail->IsSMTP();
         $mail->SMTPAuth = true;
