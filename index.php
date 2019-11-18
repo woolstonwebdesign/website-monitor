@@ -29,7 +29,8 @@ $html_body = null;
 
 foreach($sites as $site) {
     $url = $site['URL'];
-    if ($url) {
+    $isSupprtCustomer = (bool)$site["IsSupportCustomer"];
+    if ($url && $isSupprtCustomer) {
         date_default_timezone_set('Australia/Melbourne');
         $startTime = new \DateTime();
         $headers = get_headers($url, 1);
